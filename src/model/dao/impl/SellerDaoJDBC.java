@@ -5,10 +5,13 @@
  */
 package model.dao.impl;
 
+import db.DB;
+import db.DBException;
 import java.util.List;
 import model.dao.SellerDao;
 import model.entities.Seller;
-
+import java.sql.*;
+import model.entities.Department;
 /**
  *
  * @author Saulo
@@ -21,10 +24,13 @@ public class SellerDaoJDBC implements SellerDao {
     instanciar nas classes principais 
     EX: SellerDao sellerDao = new SellerDao(); ==> SellerDao sellerDao = DaoFactory.creatSellerDao();
     */
-    
+      private Connection conn;
+    public SellerDaoJDBC(Connection conn) {
+       this.conn = conn;
+    }
+
     @Override
     public void insert(Seller obj) {
-       
     }
 
     @Override
@@ -39,7 +45,40 @@ public class SellerDaoJDBC implements SellerDao {
 
     @Override
     public Seller findById(Integer id) {
-    return null;
+        PreparedStatement st = null;
+        ResultSet rs = null;
+        try{
+            st = conn.prepareStatement(
+            "SELECT seller.*,department.Name as DepName " +
+            "FROM seller INNER JOIN department " +
+            "ON seller.DepartmentId = department.Id " +
+            "WHERE seller.Id = ?");
+            st.setInt(1, id);
+            rs = st.executeQuery();
+            //rs.next testa se veio algum resultado, rs = 0 inicialmente
+            /* */
+            if(rs.next()){
+              Department dep = new Department();
+              dep.setId(rs.getInt("DepartmentId"));
+              dep.setName(rs.getString("DepName"));
+              
+              Seller obj = new Seller();
+              obj.setId(rs.getInt("Id"));
+              obj.setName(rs.getString("Name"));
+              obj.setEmail(rs.getString("Email"));
+              obj.setBaseSalary(rs.getDouble("BaseSalary"));
+              obj.setBirthDate(rs.getDate("BirthDate"));
+              obj.setDepartment(dep);
+              return obj;
+            }
+              return null;
+        }catch(SQLException e){
+            throw new DBException(e.getMessage());
+        }finally{
+            DB.closeStatement(st);
+            DB.closeResultSet(rs);
+        }
+      
     }
 
     @Override
