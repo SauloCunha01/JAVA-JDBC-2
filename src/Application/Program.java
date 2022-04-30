@@ -33,10 +33,14 @@ public class Program {
                     System.out.println(obj2);
                 }
                 
-                 System.out.println("___________________Teste3_____________________");
+                System.out.println("___________________Teste3_____________________");
                 list = sellerDao.findAll();
                 for(Seller obj2 : list){
                     System.out.println(obj2);
                 }
+                System.out.println("___________________Teste4_____________________");
+                Seller newSeller = new Seller(null, "Greg", "greg@hotmail.com", new Date(), 4000.0, department);
+                sellerDao.insert(newSeller);
+                System.out.println("Inserido! novo Id = "+newSeller.getId());
     }
 }
